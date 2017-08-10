@@ -1,3 +1,6 @@
 <resources>
+
     <string name="app_name">ImageLoaderUtils</string>
+    <string name="transitional_image">the image of transition</string>
+
 </resources>
