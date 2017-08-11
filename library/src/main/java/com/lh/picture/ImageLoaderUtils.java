@@ -16,8 +16,21 @@ public class ImageLoaderUtils {
 
     private BaseImageLoaderStrategy mStrategy;
 
+    // 普通模式
+    public static final int LOAD_STRATEGY_NORMAL = 0;
+    // TODO 仅WIFI
+    public static final int LOAD_STRATEGY_ONLY_WIFI = 1;
+
     protected ImageLoaderUtils() {
         mStrategy = new GlideImageLoaderStrategy();
+    }
+
+    /**
+     * 设置策略
+     * @param strategy
+     */
+    public void setStrategy(BaseImageLoaderStrategy strategy) {
+        mStrategy = strategy;
     }
 
     /**
