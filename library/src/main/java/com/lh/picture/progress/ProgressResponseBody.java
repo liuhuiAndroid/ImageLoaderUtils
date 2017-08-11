@@ -49,13 +49,13 @@ public class ProgressResponseBody extends ResponseBody {
     private Source source(Source source) {
         return new ForwardingSource(source) {
             long totalBytesRead = 0;
-
             @Override
             public long read(Buffer sink, long byteCount) throws IOException {
                 long bytesRead = super.read(sink, byteCount);
                 totalBytesRead += (bytesRead == -1) ? 0 : bytesRead;
                 if (progressListener != null) {
-                    progressListener.onProgress(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
+                    final int percent = (int) ((totalBytesRead * 1.0f / responseBody.contentLength()) * 100.0f);
+                    progressListener.onProgress(percent, bytesRead == -1);
                 }
                 return bytesRead;
             }

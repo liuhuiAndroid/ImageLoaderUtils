@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -47,19 +46,10 @@ public class SingleImageActivity extends AppCompatActivity {
 
         ImageLoaderUtils.getInstance().loadImageWithProgress(girl, mImageView, new ProgressListener() {
             @Override
-            public void onProgress(final long bytesRead, final long totalBytes, final boolean isDone) {
-
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final int percent = (int) ((bytesRead * 1.0f / totalBytes) * 100.0f);
-                        Log.i("TAG", "test SingleImageActivity percent1:" + percent);
-                        mProgressView.setProgress(percent);
-                        mProgressView.setVisibility(isDone ? View.GONE : View.VISIBLE);
-                        mMaskView.setVisibility(isDone ? View.GONE : View.VISIBLE);
-                    }
-                });
+            public void onProgress(int percent, boolean isDone) {
+                mProgressView.setProgress(percent);
+                mProgressView.setVisibility(isDone ? View.GONE : View.VISIBLE);
+                mMaskView.setVisibility(isDone ? View.GONE : View.VISIBLE);
             }
         }, girl_thumbnail);
 
@@ -68,16 +58,12 @@ public class SingleImageActivity extends AppCompatActivity {
             public void onProgress(final long bytesRead, final long totalBytes, final boolean isDone) {
 
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
                         final int percent = (int) ((bytesRead * 1.0f / totalBytes) * 100.0f);
                         Log.i("TAG", "test SingleImageActivity percent2:" + percent);
                         mProgressView2.setProgress(percent);
                         mProgressView2.setVisibility(isDone ? View.GONE : View.VISIBLE);
                         mMaskView.setVisibility(isDone ? View.GONE : View.VISIBLE);
-                    }
-                });
+
             }
         }, cat_thumbnail);*/
 

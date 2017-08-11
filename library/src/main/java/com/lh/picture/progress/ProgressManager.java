@@ -1,13 +1,14 @@
 package com.lh.picture.progress;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.lh.picture.listener.ProgressListener;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import okhttp3.Interceptor;
@@ -21,8 +22,7 @@ import okhttp3.Response;
 
 public class ProgressManager {
 
-    private static List<WeakReference<ProgressListener>> listeners =
-            Collections.synchronizedList(new ArrayList<WeakReference<ProgressListener>>());
+    private static List<ProgressListener> listeners =new ArrayList<ProgressListener>();
 
     private static OkHttpClient okHttpClient;
 
@@ -47,16 +47,24 @@ public class ProgressManager {
     private static final ProgressListener LISTENER = new ProgressListener() {
 
         @Override
-        public void onProgress(long bytesRead, long totalBytes, boolean isDone) {
+        public void onProgress(final int percent, final boolean isDone) {
             if (listeners == null || listeners.size() == 0) return;
 
+            Log.i("TAG", "test ProgressManager listeners.size = "+listeners.size());
+
             for (int i = 0; i < listeners.size(); i++) {
-                WeakReference<ProgressListener> listener = listeners.get(i);
-                ProgressListener progressListener = listener.get();
+                final ProgressListener progressListener = listeners.get(i);
                 if (progressListener == null) {
                     listeners.remove(i);
+                    Log.i("TAG", "test ProgressManager progressListener = null");
                 } else {
-                    progressListener.onProgress( bytesRead, totalBytes, isDone);
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i("TAG", "test ProgressManager post:" + percent +",isDone:"+isDone);
+                            progressListener.onProgress(percent, isDone);
+                        }
+                    });
                 }
             }
         }
@@ -67,28 +75,28 @@ public class ProgressManager {
         if (progressListener == null)
             return;
         if (findProgressListener(progressListener) == null) {
-            listeners.add(new WeakReference<>(progressListener));
+            listeners.add(progressListener);
         }
     }
 
     public static void removeProgressListener(ProgressListener progressListener) {
         if (progressListener == null)
             return;
-        WeakReference<ProgressListener> listener = findProgressListener(progressListener);
+        ProgressListener listener = findProgressListener(progressListener);
         if (listener != null) {
             listeners.remove(listener);
         }
     }
 
-    private static WeakReference<ProgressListener> findProgressListener(ProgressListener listener) {
+    private static ProgressListener findProgressListener(ProgressListener listener) {
         if (listener == null)
             return null;
         if (listeners == null || listeners.size() == 0)
             return null;
 
         for (int i = 0; i < listeners.size(); i++) {
-            WeakReference<ProgressListener> progressListener = listeners.get(i);
-            if (progressListener.get() == listener) {
+            ProgressListener progressListener = listeners.get(i);
+            if (progressListener == listener) {
                 return progressListener;
             }
         }

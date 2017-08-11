@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -92,47 +93,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void download() {
-        MyThread thread = new MyThread();
-        thread.start();
-    }
+        ImageLoaderUtils.getInstance().saveImage(MainActivity.this, IMAGE_URL6,
+                getExternalCacheDir().getAbsolutePath(), "pic", new ImageSaveListener() {
+                    @Override
+                    public void onSaveSuccess() {
+                        Toast.makeText(MainActivity.this, "下载成功", Toast.LENGTH_SHORT).show();
+                    }
 
-    public class MyThread extends Thread {
-        @Override
-        public void run() {
-            super.run();
-            ImageLoaderUtils.getInstance().saveImage(MainActivity.this, IMAGE_URL6,
-                    getExternalCacheDir().getAbsolutePath(), "pic", new ImageSaveListener() {
-                        @Override
-                        public void onSaveSuccess() {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(MainActivity.this, "下载成功", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
+                    @Override
+                    public void onSaveFail() {
+                        Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
+                    }
 
-                        @Override
-                        public void onSaveFail() {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onProgress(final int progress) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                   mProgressBar.setProgress(progress);
-                                }
-                            });
-                        }
-                    });
-        }
+                    @Override
+                    public void onProgress(final int progress) {
+                        mProgressBar.setProgress(progress);
+                    }
+                });
     }
 
 }

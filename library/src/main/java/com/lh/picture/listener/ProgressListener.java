@@ -7,6 +7,6 @@ package com.lh.picture.listener;
 
 public interface ProgressListener {
 
-    void onProgress(long bytesRead, long totalBytes, boolean isDone);
+    void onProgress(int percent, boolean isDone);
 
 }
