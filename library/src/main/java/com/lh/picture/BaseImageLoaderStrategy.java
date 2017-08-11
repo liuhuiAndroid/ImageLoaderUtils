@@ -33,4 +33,7 @@ public interface BaseImageLoaderStrategy {
     //清除内存缓存
     void clearImageMemoryCache(Context context);
 
+    //清除所有缓存
+    void clearImageAllCache(Context context);
+
 }

@@ -33,8 +33,7 @@ import java.io.OutputStream;
 public class GlideImageLoaderStrategy implements BaseImageLoaderStrategy {
 
     private static final String HTTP = "http";
-    private ProgressListener internalProgressListener;
-    private  ImageSaveListener mImageSaveListener;
+    private ImageSaveListener mImageSaveListener;
 
     @Override
     public void loadImage(String url, ImageView imageView) {
@@ -71,7 +70,7 @@ public class GlideImageLoaderStrategy implements BaseImageLoaderStrategy {
             return;
         }
         mImageSaveListener = listener;
-        DownloadThread downloadThread = new DownloadThread(context,url,savePath,saveFileName);
+        DownloadThread downloadThread = new DownloadThread(context, url, savePath, saveFileName);
         downloadThread.start();
     }
 
@@ -82,11 +81,12 @@ public class GlideImageLoaderStrategy implements BaseImageLoaderStrategy {
         if (!url.startsWith(HTTP))
             return;
 
-        ProgressManager.addProgressListener(listener);
+        ProgressManager.addProgressListener(url, listener);
         GlideApp.with(imageView.getContext()).load(url)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
-//                .thumbnail(Glide.with(imageView.getContext())
-//                        .load(image_url_thumbnail))
+                .skipMemoryCache(true)
+                .thumbnail(Glide.with(imageView.getContext())
+                        .load(image_url_thumbnail))
                 .into(imageView);
     }
 
@@ -119,23 +119,29 @@ public class GlideImageLoaderStrategy implements BaseImageLoaderStrategy {
         }
     }
 
+    @Override
+    public void clearImageAllCache(Context context) {
+        clearImageDiskCache(context.getApplicationContext());
+        clearImageMemoryCache(context.getApplicationContext());
+    }
+
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(mImageSaveListener!=null) {
+            if (mImageSaveListener != null) {
                 if (msg.what == 0) {
                     mImageSaveListener.onSaveFail();
                 } else if (msg.what == 1) {
                     mImageSaveListener.onSaveSuccess();
-                }else if (msg.what == 2) {
+                } else if (msg.what == 2) {
                     mImageSaveListener.onProgress(msg.arg1);
                 }
             }
         }
     };
 
-    private class DownloadThread extends Thread{
+    private class DownloadThread extends Thread {
 
         private Context mContext;
         private String mUrl;
@@ -176,8 +182,8 @@ public class GlideImageLoaderStrategy implements BaseImageLoaderStrategy {
                     toStream.write(length, 0, count);
                     totalBytesRead += ((count != -1) ? count : 0);
 
-                    int percent = (int) ((totalBytesRead*1.0f)/totalSize*100.0f);
-                    Message message = Message.obtain(mHandler,2);
+                    int percent = (int) ((totalBytesRead * 1.0f) / totalSize * 100.0f);
+                    Message message = Message.obtain(mHandler, 2);
                     message.arg1 = percent;
                     message.what = 2;
                     mHandler.sendMessage(message);

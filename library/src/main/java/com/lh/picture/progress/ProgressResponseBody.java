@@ -19,11 +19,13 @@ import okio.Source;
 
 public class ProgressResponseBody extends ResponseBody {
 
+    private String imageUrl;
     private ResponseBody responseBody;
     private ProgressListener progressListener;
     private BufferedSource bufferedSource;
 
-    public ProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener) {
+    public ProgressResponseBody(String url,ResponseBody responseBody, ProgressListener progressListener) {
+        this.imageUrl = url;
         this.responseBody = responseBody;
         this.progressListener = progressListener;
     }
@@ -55,10 +57,11 @@ public class ProgressResponseBody extends ResponseBody {
                 totalBytesRead += (bytesRead == -1) ? 0 : bytesRead;
                 if (progressListener != null) {
                     final int percent = (int) ((totalBytesRead * 1.0f / responseBody.contentLength()) * 100.0f);
-                    progressListener.onProgress(percent, bytesRead == -1);
+                    progressListener.onProgress(imageUrl,percent, bytesRead == -1);
                 }
                 return bytesRead;
             }
         };
     }
+
 }

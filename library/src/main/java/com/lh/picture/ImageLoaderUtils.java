@@ -62,4 +62,9 @@ public class ImageLoaderUtils {
         mStrategy.clearImageMemoryCache(context);
     }
 
+    public void clearImageAllCache(Context context) {
+        mStrategy.clearImageAllCache(context);
+    }
+
+
 }

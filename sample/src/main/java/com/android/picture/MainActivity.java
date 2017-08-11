@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -60,9 +59,6 @@ public class MainActivity extends AppCompatActivity {
         mImageView1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageLoaderUtils.getInstance().clearImageDiskCache(MainActivity.this);
-                ImageLoaderUtils.getInstance().clearImageMemoryCache(MainActivity.this);
-
                 Intent intent = new Intent(MainActivity.this, SingleImageActivity.class);
                 // 转场动画ActivityOptions,ActivityOptionsCompat是兼容包
                 ActivityOptionsCompat compat = ActivityOptionsCompat

@@ -3,13 +3,13 @@ package com.lh.picture.progress;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.text.TextUtils;
 
 import com.lh.picture.listener.ProgressListener;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -22,7 +22,8 @@ import okhttp3.Response;
 
 public class ProgressManager {
 
-    private static List<ProgressListener> listeners =new ArrayList<ProgressListener>();
+    //    private static List<ProgressListener> listeners =new ArrayList<ProgressListener>();
+    private static Map<String, ProgressListener> listeners = new HashMap<>();
 
     private static OkHttpClient okHttpClient;
 
@@ -35,7 +36,7 @@ public class ProgressManager {
                             Request request = chain.request();
                             Response response = chain.proceed(request);
                             return response.newBuilder()
-                                    .body(new ProgressResponseBody(response.body(), LISTENER))
+                                    .body(new ProgressResponseBody(request.url().toString(), response.body(), LISTENER))
                                     .build();
                         }
                     })
@@ -47,60 +48,57 @@ public class ProgressManager {
     private static final ProgressListener LISTENER = new ProgressListener() {
 
         @Override
-        public void onProgress(final int percent, final boolean isDone) {
-            if (listeners == null || listeners.size() == 0) return;
-
-            Log.i("TAG", "test ProgressManager listeners.size = "+listeners.size());
-
-            for (int i = 0; i < listeners.size(); i++) {
-                final ProgressListener progressListener = listeners.get(i);
-                if (progressListener == null) {
-                    listeners.remove(i);
-                    Log.i("TAG", "test ProgressManager progressListener = null");
-                } else {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i("TAG", "test ProgressManager post:" + percent +",isDone:"+isDone);
-                            progressListener.onProgress(percent, isDone);
-                        }
-                    });
+        public void onProgress(final String imageUrl, final int percent, final boolean isDone) {
+            if (listeners == null || listeners.size() == 0)
+                return;
+            for (String key : listeners.keySet()) {
+                if (key.equals(imageUrl)) {
+                    final ProgressListener progressListener = listeners.get(key);
+                    if (progressListener == null) {
+                        listeners.remove(key);
+                    } else {
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressListener.onProgress(imageUrl, percent, isDone);
+                            }
+                        });
+                    }
                 }
             }
+
         }
     };
 
 
-    public static void addProgressListener(ProgressListener progressListener) {
-        if (progressListener == null)
+    public static void addProgressListener(String imageUrl, ProgressListener progressListener) {
+        if (imageUrl == null || TextUtils.isEmpty(imageUrl) || progressListener == null)
             return;
-        if (findProgressListener(progressListener) == null) {
-            listeners.add(progressListener);
+        if (!findProgressListener(imageUrl)) {
+            listeners.put(imageUrl, progressListener);
         }
     }
 
-    public static void removeProgressListener(ProgressListener progressListener) {
-        if (progressListener == null)
+    public static void removeProgressListener(String imageUrl) {
+        if (imageUrl == null || TextUtils.isEmpty(imageUrl))
             return;
-        ProgressListener listener = findProgressListener(progressListener);
-        if (listener != null) {
-            listeners.remove(listener);
+        if (findProgressListener(imageUrl)) {
+            listeners.remove(imageUrl);
         }
     }
 
-    private static ProgressListener findProgressListener(ProgressListener listener) {
-        if (listener == null)
-            return null;
+    private static boolean findProgressListener(String imageUrl) {
+        if (imageUrl == null || TextUtils.isEmpty(imageUrl))
+            return false;
         if (listeners == null || listeners.size() == 0)
-            return null;
+            return false;
 
-        for (int i = 0; i < listeners.size(); i++) {
-            ProgressListener progressListener = listeners.get(i);
-            if (progressListener == listener) {
-                return progressListener;
+        for (String key : listeners.keySet()) {
+            if (key.equals(imageUrl)) {
+                return true;
             }
         }
-        return null;
+        return false;
     }
-    
+
 }

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -22,9 +23,7 @@ import static com.android.picture.R.id.maskView;
 public class SingleImageActivity extends AppCompatActivity {
 
     private ImageView mImageView;
-    private ImageView mImageView2;
     private CircleProgressView mProgressView;
-    private CircleProgressView mProgressView2;
     private View mMaskView;
 
     @Override
@@ -32,9 +31,7 @@ public class SingleImageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_image);
         mImageView = (ImageView) findViewById(R.id.imageView);
-        mImageView2 = (ImageView) findViewById(R.id.imageView2);
         mProgressView = (CircleProgressView) findViewById(R.id.progressView);
-        mProgressView2 = (CircleProgressView) findViewById(R.id.progressView2);
         mMaskView = findViewById(maskView);
 
         mImageView.setOnClickListener(new View.OnClickListener() {
@@ -43,30 +40,16 @@ public class SingleImageActivity extends AppCompatActivity {
                 ActivityCompat.finishAfterTransition(SingleImageActivity.this);
             }
         });
-
+        mProgressView.setVisibility(View.VISIBLE);
         ImageLoaderUtils.getInstance().loadImageWithProgress(girl, mImageView, new ProgressListener() {
             @Override
-            public void onProgress(int percent, boolean isDone) {
+            public void onProgress(String imageUrl, int percent, boolean isDone) {
+                Log.i("TAG", "onProgress :" + percent + " ,testChangeThread : " + Thread.currentThread().getName()+" ,isDone : "+isDone);
                 mProgressView.setProgress(percent);
                 mProgressView.setVisibility(isDone ? View.GONE : View.VISIBLE);
                 mMaskView.setVisibility(isDone ? View.GONE : View.VISIBLE);
             }
         }, girl_thumbnail);
-
-      /*  ImageLoaderUtils.getInstance().loadImageWithProgress(cat, mImageView2, new ProgressListener() {
-            @Override
-            public void onProgress(final long bytesRead, final long totalBytes, final boolean isDone) {
-
-
-                        final int percent = (int) ((bytesRead * 1.0f / totalBytes) * 100.0f);
-                        Log.i("TAG", "test SingleImageActivity percent2:" + percent);
-                        mProgressView2.setProgress(percent);
-                        mProgressView2.setVisibility(isDone ? View.GONE : View.VISIBLE);
-                        mMaskView.setVisibility(isDone ? View.GONE : View.VISIBLE);
-
-            }
-        }, cat_thumbnail);*/
-
     }
 
 }
